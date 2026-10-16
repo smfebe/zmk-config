@@ -1,0 +1,5 @@
+config SHIELD_FLIXKEEB_LEFT
+    def_bool $(shields_list_contains,flixkeeb_left)
+
+config SHIELD_FLIXKEEB_RIGHT
+    def_bool $(shields_list_contains,flixkeeb_right)
