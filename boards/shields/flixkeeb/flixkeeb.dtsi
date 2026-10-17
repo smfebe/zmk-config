@@ -1,5 +1,6 @@
 #include <dt-bindings/zmk/matrix_transform.h> // Put this with the other includes at the top of your dtsi
 #include <dt-bindings/led/led.h>
+#include "flixkeeb-layouts.dtsi"
 
 &pinctrl {
     spi3_default: spi3_default {
@@ -37,8 +38,8 @@
 / {
     chosen {
         zmk,kscan = &kscan0;
-        zmk,matrix-transform = &default_transform;
         zmk,underglow = &led_strip;
+        zmk,physical-layout = &physical_layout0;
     };
 
     kscan0: kscan0 {
