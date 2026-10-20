@@ -1,0 +1,4 @@
+# Optional: Darstellung anpassen. Alle Werte sind Standardwerte und koennen entfernt werden.
+draw_config:
+  key_w: 60
+  key_h: 56
