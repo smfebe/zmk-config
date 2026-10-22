@@ -1,14 +1,93 @@
 layout: {zmk_keyboard: flixkeeb}
 layers:
-  default:
-  - ['`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-']
+  Base:
+  - [ESC, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-']
   - [TAB, Q, W, E, R, T, Y, U, I, O, P, BSPC]
-  - [LSHFT, A, S, D, F, G, H, J, K, L, ;, '''']
-  - [LCTRL, Z, X, C, V, B, N, M, ',', ., /, ESC]
-  - [LGUI, lower, SPACE, RET, raise, RALT]
-  lower:
-  - [RGB TOG, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11]
-  - - RGB EFF
+  - [LSHFT, A, S, D, F, G, H, J, K, L, 'Sft+,', Sft+\]
+  - [LCTRL, Z, X, C, V, B, N, M, ',', ., /, Sft+7]
+  - [LGUI, Lower, SPACE, RET, Raise, RALT]
+  Lower:
+  - [F11, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F12]
+  - - {t: ▽, type: trans}
+    - AltGr+8
+    - AltGr+9
+    - NUBS
+    - Sft+NUBS
+    - {t: ▽, type: trans}
+    - '7'
+    - '8'
+    - '9'
+    - Sft+7
+    - Sft+]
+    - {t: ▽, type: trans}
+  - - {t: ▽, type: trans}
+    - Sft+8
+    - Sft+9
+    - AltGr+7
+    - AltGr+0
+    - {t: ▽, type: trans}
+    - '4'
+    - '5'
+    - '6'
+    - /
+    - ']'
+    - {t: ▽, type: trans}
+  - - {t: ▽, type: trans}
+    - AltGr+Q
+    - AltGr+-
+    - AltGr+NUBS
+    - \
+    - {t: ▽, type: trans}
+    - '1'
+    - '2'
+    - '3'
+    - '0'
+    - ','
+    - Sft+0
+  - - {t: ▽, type: trans}
+    - {type: held}
+    - {t: ▽, type: trans}
+    - {t: ▽, type: trans}
+    - {t: ▽, type: trans}
+    - {t: ▽, type: trans}
+  Raise:
+  - - {t: ▽, type: trans}
+    - {t: BT, h: '0'}
+    - {t: BT, h: '1'}
+    - {t: BT, h: '2'}
+    - {t: BT, h: '3'}
+    - {t: BT, h: '4'}
+    - OUT USB
+    - OUT BLE
+    - OUT TOG
+    - {t: ▽, type: trans}
+    - {t: ▽, type: trans}
+    - {t: ▽, type: trans}
+  - - {t: ▽, type: trans}
+    - RGB TOG
+    - RGB EFF
+    - RGB BRI
+    - RGB BRD
+    - {t: ▽, type: trans}
+    - {t: ▽, type: trans}
+    - '['
+    - {t: ▽, type: trans}
+    - ;
+    - {t: ▽, type: trans}
+    - {t: ▽, type: trans}
+  - - {t: ▽, type: trans}
+    - ''''
+    - {t: ▽, type: trans}
+    - {t: ▽, type: trans}
+    - RGB HUI
+    - RGB SAI
+    - LEFT
+    - DOWN
+    - UP
+    - RIGHT
+    - {t: ▽, type: trans}
+    - {t: ▽, type: trans}
+  - - {t: ▽, type: trans}
     - '&studio_unlock'
     - {t: ▽, type: trans}
     - {t: ▽, type: trans}
@@ -19,89 +98,10 @@ layers:
     - {t: ▽, type: trans}
     - {t: ▽, type: trans}
     - {t: ▽, type: trans}
-    - BSPC
-  - - BT CLR
-    - {t: BT, h: '0'}
-    - {t: BT, h: '1'}
-    - {t: BT, h: '2'}
-    - {t: BT, h: '3'}
-    - {t: BT, h: '4'}
-    - LEFT
-    - DOWN
-    - UP
-    - RIGHT
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-  - - LSHFT
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-  - - LGUI
-    - {type: held}
-    - SPACE
-    - RET
-    - {t: ▽, type: trans}
-    - RALT
-  raise:
-  - - {t: ▽, type: trans}
-    - '!'
-    - '@'
-    - '#'
-    - $
-    - '%'
-    - ^
-    - '&'
-    - '*'
-    - (
-    - )
-    - _
+    - BT CLR
   - - {t: ▽, type: trans}
     - {t: ▽, type: trans}
     - {t: ▽, type: trans}
     - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - BSPC
-  - - LCTRL
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - '-'
-    - '='
-    - '['
-    - ']'
-    - \
-    - '`'
-  - - LSHFT
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - {t: ▽, type: trans}
-    - _
-    - +
-    - '{'
-    - '}'
-    - '|'
-    - '~'
-  - - LGUI
-    - {t: ▽, type: trans}
-    - SPACE
-    - RET
     - {type: held}
-    - RALT
+    - {t: ▽, type: trans}
