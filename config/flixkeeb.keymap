@@ -1,35 +1,123 @@
 /*
- * Copyright (c) 2020 The ZMK Contributors
+ * flixkeeb – ZMK-Keymap (2 x 27 Tasten, deutsches Layout)
  *
- * SPDX-License-Identifier: MIT
+ * ============================================================================
+ *  INHALT
+ * ============================================================================
+ *   0. Spickzettel ........ Tastenpositionen, Abkürzungen, Beispiele
+ *   1. Includes
+ *   2. Layer-Indizes
+ *   3. Deutsche Zeichen ... #define-Namen (DE_AT, DE_LBKT, DE_UUML, ...)
+ *   4. Behaviors .......... eigene Hold-Taps (lt_bal, mt_left, mt_right)
+ *   5. Combos ............. Caps Word, System-Layer (+ deaktivierte Umlaut-Combos)
+ *   6. Layer .............. BASE, LOWER, RAISE, SYSTEM
+ *
+ * ============================================================================
+ *  0. SPICKZETTEL
+ * ============================================================================
+ *
+ *  Tastenpositionen (Nummern, die Combos in "key-positions" brauchen)
+ *  -------------------------------------------------------------------
+ *       linke Hälfte                    rechte Hälfte
+ *    0   1   2   3   4   5          6   7   8   9  10  11
+ *   12  13  14  15  16  17         18  19  20  21  22  23
+ *   24  25  26  27  28  29         30  31  32  33  34  35
+ *   36  37  38  39  40  41         42  43  44  45  46  47
+ *               48  49  50         51  52  53          <- Daumen
+ *       (aussen -> innen)        (innen -> aussen)
+ *
+ *  Die Reihenfolge der Bindings in jedem Layer folgt genau diesen Nummern:
+ *  Zeile für Zeile (je 12 Tasten), danach die 6 Daumentasten. Jeder Layer
+ *  braucht genau 54 Einträge.
+ *
+ *  Abkürzungen
+ *  -----------
+ *   kp ....... key press (normale Taste)         mo ....... momentary layer
+ *   mt ....... mod-tap (tippen = Taste, halten = Modifier)
+ *   lt ....... layer-tap (tippen = Taste, halten = Layer)
+ *   sk ....... sticky key      tog ...... toggle layer      to ....... gehe zu Layer
+ *   trans .... transparent: reicht die Taste an den Layer darunter durch
+ *   none ..... Taste tut nichts
+ *   L/R vor Modifier: Left/Right.   LSHFT = linkes Shift, RALT = rechtes Alt (AltGr)
+ *   Modifier-Funktionen:  LS(x) = Shift+x    LC(x) = Strg+x    LA(x) = Alt+x
+ *                         RA(x) = AltGr+x    LG(x) = GUI+x     (Windows-/Super-Taste = GUI)
+ *
+ *  Beispiele zum Kopieren
+ *  ----------------------
+ *   &kp A                      Taste A
+ *   &kp LS(A)                  Shift+A
+ *   &kp DE_AT                  @ (Name aus Abschnitt 3)
+ *   &kp LCTRL                  Strg dauerhaft gehalten, solange die Taste gedrückt ist
+ *   &mo LOWER                  Layer LOWER, solange die Taste gehalten wird
+ *   &to BASE                   dauerhaft zu Layer BASE wechseln
+ *   &tog RAISE                 Layer RAISE ein-/ausschalten
+ *   &sk LSHFT                  Sticky Shift: antippen, wirkt auf die nächste Taste
+ *   &mt LCTRL A                Mod-Tap (Standard): tippen = A, halten = Strg
+ *   &lt LOWER SPACE            Layer-Tap (Standard): tippen = Space, halten = LOWER
+ *   &mt_left LGUI DE_Y         eigenes Mod-Tap links (Abschnitt 4): tippen = Y, halten = GUI
+ *   &lt_bal RAISE RET          eigenes Layer-Tap (Abschnitt 4): tippen = Enter, halten = RAISE
+ *   &trans                     durchreichen          &none   Taste sperren
+ *   &bt BT_SEL 0               Bluetooth-Profil 0    &bt BT_CLR   aktives Profil löschen
+ *   &out OUT_USB               Ausgabe: OUT_USB / OUT_BLE / OUT_TOG
+ *   &rgb_ug RGB_TOG            LEDs: RGB_TOG, RGB_EFF, RGB_BRI, RGB_BRD, RGB_HUI, RGB_SAI
+ *   &caps_word                 Caps Word (Großschreibung bis zum Wortende)
+ *   &studio_unlock             ZMK Studio entsperren
+ *   &inc_dec_kp A B            Encoder: Drehung rechts = A, links = B
+ *
+ *  Hold-Tap Einstellwerte (Abschnitt 4)
+ *  ------------------------------------
+ *   flavor "balanced"         Halten, sobald eine zweite Taste gedrückt und wieder
+ *                             losgelassen wird oder die Haltezeit abläuft
+ *   flavor "tap-preferred"    Halten nur nach Ablauf der Haltezeit (Standard bei &mt/&lt)
+ *   tapping-term-ms           Haltezeit; höher = weniger Fehlauslösungen, träger
+ *   quick-tap-ms              nach einem Tippen: erneuter Druck innerhalb dieser Zeit
+ *                             ist immer ein Tippen (Wiederholung durch Halten)
+ *   require-prior-idle-ms     direkt nach einer anderen Taste immer Tippen
+ *   hold-trigger-key-positions  Halten nur, wenn die zweite Taste auf einer dieser
+ *                             Positionen liegt (z.B. nur Taste der anderen Hand)
  */
 
+// =============================================================================
+//  1. INCLUDES
+// =============================================================================
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/outputs.h>
 #include <dt-bindings/zmk/rgb.h>
 
-// ---------------------------------------------------------------------------
-// Layer-Indizes: neue Layer immer hinten anhaengen
-// ---------------------------------------------------------------------------
+// =============================================================================
+//  2. LAYER-INDIZES
+//  Neue Layer immer hinten anhängen, die Reihenfolge der Layer-Blöcke in
+//  Abschnitt 6 muss zu diesen Nummern passen.
+// =============================================================================
 #define BASE   0
 #define LOWER  1
 #define RAISE  2
 #define SYSTEM 3
 
-// ---------------------------------------------------------------------------
-// Deutsche Belegung: ZMK sendet US-Tastenpositionen, der Rechner steht auf DE
-// ---------------------------------------------------------------------------
-// Hinweis: keymap-drawer definiert KEYMAP_DRAWER. Dann bleiben die DE_*-Namen
-// unaufgeloest und werden ueber zmk_keycode_map in keymap_drawer.config.yaml
-// als Zeichen dargestellt. Beim echten Firmware-Build ist das Makro nicht definiert.
+// =============================================================================
+//  3. DEUTSCHE ZEICHEN
+//  ZMK sendet US-Tastenpositionen, der Rechner steht auf dem deutschen Layout.
+//  Die Namen DE_* geben an, welches Zeichen herauskommt.
+//
+//  keymap-drawer definiert das Makro KEYMAP_DRAWER. Dann werden die Namen
+//  hier nicht aufgelöst, und keymap_drawer.config.yaml (zmk_keycode_map)
+//  zeigt das Zeichen im Bild. Beim echten Firmware-Build ist es nicht gesetzt.
+// =============================================================================
 #ifndef KEYMAP_DRAWER
-// Buchstaben, die auf DE vertauscht sind
+
+// --- Buchstaben, die auf DE vertauscht sind ----------------------------------
 #define DE_Y      Z
 #define DE_Z      Y
 
-// Symbole
+// --- Umlaute und ß -----------------------------------------------------------
+#define DE_UUML   LBKT        // ü
+#define DE_OUML   SEMI        // ö
+#define DE_AUML   SQT         // ä
+#define DE_SS     MINUS       // ß
+
+// --- Zeichen der Zahlenreihe mit Shift ---------------------------------------
 #define DE_EXCL   LS(N1)      // !
 #define DE_DQT    LS(N2)      // "
 #define DE_DLLR   LS(N4)      // $
@@ -40,75 +128,112 @@
 #define DE_RPAR   LS(N9)      // )
 #define DE_EQUAL  LS(N0)      // =
 #define DE_QMARK  LS(MINUS)   // ?
+
+// --- Zeichen mit AltGr -------------------------------------------------------
 #define DE_AT     RA(Q)       // @
-#define DE_EURO   RA(E)       // euro
-#define DE_MU     RA(M)       // my (mikro)
-#define DE_SUP2   RA(N2)      // hoch 2
-#define DE_SUP3   RA(N3)      // hoch 3
-#define DE_HASH   BSLH        // #  (mit Shift: ')
-#define DE_PLUS   RBKT        // +  (mit Shift: *)
-#define DE_ASTRK  LS(RBKT)    // *
+#define DE_EURO   RA(E)       // €
+#define DE_MU     RA(M)       // µ
+#define DE_SUP2   RA(N2)      // ²
+#define DE_SUP3   RA(N3)      // ³
 #define DE_TILDE  RA(RBKT)    // ~
 #define DE_LBKT   RA(N8)      // [
 #define DE_RBKT   RA(N9)      // ]
 #define DE_LBRC   RA(N7)      // {
 #define DE_RBRC   RA(N0)      // }
-#define DE_BSLH   RA(MINUS)   // backslash
+#define DE_BSLH   RA(MINUS)   // \  (Backslash)
+#define DE_PIPE   RA(NUBS)    // |
+
+// --- Weitere Zeichen ---------------------------------------------------------
+#define DE_HASH   BSLH        // #  (mit Shift: ')
+#define DE_SQT    LS(BSLH)    // '
+#define DE_PLUS   RBKT        // +  (mit Shift: *)
+#define DE_ASTRK  LS(RBKT)    // *
 #define DE_MINUS  FSLH        // -
 #define DE_UNDER  LS(FSLH)    // _
 #define DE_SEMI   LS(COMMA)   // ;
 #define DE_COLON  LS(DOT)     // :
-#define DE_SQT    LS(BSLH)    // '
 #define DE_LT     NUBS        // <
 #define DE_GT     LS(NUBS)    // >
-#define DE_PIPE   RA(NUBS)    // |
-#define DE_CARET  GRAVE       // ^  (mit Shift: Grad-Zeichen) - Tottaste
-#define DE_ACUTE  EQUAL       // ´  (mit Shift: Backtick)     - Tottaste
 
-// Umlaute und ss
-#define DE_UUML   LBKT        // ue
-#define DE_OUML   SEMI        // oe
-#define DE_AUML   SQT         // ae
-#define DE_SS     MINUS       // ss
+// --- Tottasten (erscheinen erst mit dem nächsten Zeichen, außer "nodeadkeys") -
+#define DE_CARET  GRAVE       // ^  (mit Shift: °)
+#define DE_ACUTE  EQUAL       // ´  (mit Shift: `)
+
 #endif // KEYMAP_DRAWER
 
+// =============================================================================
+//  4. BEHAVIORS (eigene Hold-Taps)
+// =============================================================================
 / {
-    // -----------------------------------------------------------------------
-    // Combos (nur auf dem Base-Layer). Positionen = Index in der Map (0-53):
-    //   Zeile 0: 0-11   Zeile 1: 12-23   Zeile 2: 24-35   Zeile 3: 36-47
-    //   Daumen links (aussen -> innen): 48 49 50
-    //   Daumen rechts (innen -> aussen): 51 52 53
-    // -----------------------------------------------------------------------
+    behaviors {
+
+        // ---------------------------------------------------------------------
+        // lt_bal  –  Layer-Tap für die Daumen
+        //   Aufruf:  &lt_bal <LAYER> <TASTE>     z.B.  &lt_bal RAISE RET
+        //   tippen = Taste, halten = Layer.
+        //   "balanced": Wird beim Halten eine zweite Taste gedrückt, gilt der
+        //   Layer. Das Standard-&lt würde dort die Taste tippen.
+        // ---------------------------------------------------------------------
+        lt_bal: layer_tap_balanced {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "balanced";
+            tapping-term-ms = <200>;
+            quick-tap-ms = <150>;
+            bindings = <&mo>, <&kp>;
+        };
+
+        // ---------------------------------------------------------------------
+        // mt_left  –  Mod-Tap für die LINKE Hand (Y = GUI, X = Alt)
+        //   Aufruf:  &mt_left <MODIFIER> <TASTE>   z.B.  &mt_left LGUI DE_Y
+        //   Halten gilt nur, wenn die zweite Taste auf einer der Positionen
+        //   unten liegt: rechte Hand, Zahlenreihe, Tab (Taste 12 und Daumen 50)
+        //   und rechte Daumen. So geht GUI+L (Sperren) und Alt+Tab, ohne dass
+        //   Y und X beim normalen Tippen zu Modifiern werden.
+        // ---------------------------------------------------------------------
+        mt_left: mod_tap_left {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "balanced";
+            tapping-term-ms = <250>;
+            quick-tap-ms = <150>;
+            require-prior-idle-ms = <120>;
+            bindings = <&kp>, <&kp>;
+            hold-trigger-key-positions = <0 1 2 3 4 5  6 7 8 9 10 11  12  18 19 20 21 22 23  30 31 32 33 34 35  42 43 44 45 46 47  50 51 52 53>;
+            hold-trigger-on-release;
+        };
+
+        // ---------------------------------------------------------------------
+        // mt_right  –  Mod-Tap für die RECHTE Hand (rechter kleiner Finger: ä / Shift)
+        //   Aufruf:  &mt_right <MODIFIER> <TASTE>  z.B.  &mt_right RSHFT DE_AUML
+        //   Halten gilt nur, wenn die zweite Taste auf der LINKEN Hand liegt
+        //   (Tasten und linke Daumen). Rechtes Shift + Taste der rechten Hand
+        //   ergibt daher ä + Buchstabe: dafür das linke Shift nutzen.
+        // ---------------------------------------------------------------------
+        mt_right: mod_tap_right {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "balanced";
+            tapping-term-ms = <250>;
+            quick-tap-ms = <150>;
+            require-prior-idle-ms = <120>;
+            bindings = <&kp>, <&kp>;
+            hold-trigger-key-positions = <0 1 2 3 4 5  12 13 14 15 16 17  24 25 26 27 28 29  36 37 38 39 40 41  48 49 50>;
+            hold-trigger-on-release;
+        };
+    };
+};
+
+// =============================================================================
+//  5. COMBOS
+//  Zwei Tasten gleichzeitig (innerhalb von timeout-ms) lösen etwas anderes aus.
+//  Positionsnummern: siehe Spickzettel. "layers = <BASE>": nur auf dem Base-Layer.
+// =============================================================================
+/ {
     combos {
         compatible = "zmk,combos";
 
-        // --- Umlaute und ss: senkrechte Paare auf demselben Finger ---------
-        combo_auml {                      // Q + A  ->  ae
-            timeout-ms = <40>;
-            key-positions = <13 25>;
-            bindings = <&kp DE_AUML>;
-            layers = <BASE>;
-        };
-        combo_ouml {                      // O + L  ->  oe
-            timeout-ms = <40>;
-            key-positions = <21 33>;
-            bindings = <&kp DE_OUML>;
-            layers = <BASE>;
-        };
-        combo_uuml {                      // U + J  ->  ue
-            timeout-ms = <40>;
-            key-positions = <19 31>;
-            bindings = <&kp DE_UUML>;
-            layers = <BASE>;
-        };
-        combo_ss {                        // S + X  ->  ss
-            timeout-ms = <40>;
-            key-positions = <26 38>;
-            bindings = <&kp DE_SS>;
-            layers = <BASE>;
-        };
-
-        // --- Caps Word: beide Shift-Tasten gleichzeitig --------------------
+        // --- aktiv: Caps Word (linkes Shift + rechtes Shift) -------------------
         combo_caps_word {
             timeout-ms = <50>;
             key-positions = <24 35>;
@@ -116,98 +241,133 @@
             layers = <BASE>;
         };
 
-        // --- Layer per Daumen-Combo ----------------------------------------
-        combo_lower {                     // links: Space + Alt  -> Lower
+        // --- aktiv: System-Layer (Shift-Daumen + Entf-Daumen halten) -----------
+        combo_system {
             timeout-ms = <30>;
-            key-positions = <49 50>;
-            bindings = <&mo LOWER>;
-            layers = <BASE>;
-        };
-        combo_raise {                     // rechts: Enter + Space -> Raise
-            timeout-ms = <30>;
-            key-positions = <51 52>;
-            bindings = <&mo RAISE>;
-            layers = <BASE>;
-        };
-        combo_system {                    // beide Space-Tasten -> System
-            timeout-ms = <30>;
-            key-positions = <49 52>;
+            key-positions = <48 53>;
             bindings = <&mo SYSTEM>;
             layers = <BASE>;
         };
-    };
 
+        // --- deaktiviert: Umlaut-Combos (Umlaute liegen jetzt direkt auf Tasten) -
+        // Zum Einschalten die // entfernen.
+        //
+        // combo_auml {                      // A + Y  ->  ä
+        //     timeout-ms = <40>;
+        //     key-positions = <25 37>;
+        //     bindings = <&kp DE_AUML>;
+        //     layers = <BASE>;
+        // };
+        // combo_ouml {                      // O + L  ->  ö
+        //     timeout-ms = <40>;
+        //     key-positions = <21 33>;
+        //     bindings = <&kp DE_OUML>;
+        //     layers = <BASE>;
+        // };
+        // combo_uuml {                      // U + J  ->  ü
+        //     timeout-ms = <40>;
+        //     key-positions = <19 31>;
+        //     bindings = <&kp DE_UUML>;
+        //     layers = <BASE>;
+        // };
+        // combo_ss {                        // S + X  ->  ß
+        //     timeout-ms = <40>;
+        //     key-positions = <26 38>;
+        //     bindings = <&kp DE_SS>;
+        //     layers = <BASE>;
+        // };
+    };
+};
+
+// =============================================================================
+//  6. LAYER
+//  Jeder Layer hat 54 Bindings (4 x 12 Tasten, dann 6 Daumentasten).
+//  Die Skizze über den Bindings wird aus den Bindings erzeugt, "x" = gesperrt,
+//  leeres Feld = durchgereicht (&trans).
+// =============================================================================
+/ {
     keymap {
         compatible = "zmk,keymap";
 
         base_layer {
             display-name = "Base";
-// ------------------------------------------------------------------------------------
-// | ESC  |  1  |  2  |  3  |  4  |  5  |   |  6  |  7  |  8  |  9  |  0  | BSPC |
-// | TAB  |  Q  |  W  |  E  |  R  |  T  |   |  Z  |  U  |  I  |  O  |  P  | ENT  |
-// | SHFT |  A  |  S  |  D  |  F  |  G  |   |  H  |  J  |  K  |  L  |  ;  | SHFT |
-// | CTRL |  Y  |  X  |  C  |  V  |  B  |   |  N  |  M  |  ,  |  .  |  -  | CTRL |
-//                    | GUI | SPC | ALT |   | ENT | SPC | BSPC |
-// Combos: Q+A=ae  O+L=oe  U+J=ue  S+X=ss  SHFT+SHFT=CapsWord
-//         SPC+ALT=Lower  ENT+SPC=Raise  SPC+SPC=System
+            //
+            // BASE: Tippen. Deutsche Anordnung, Umlaute direkt auf ihren Tasten.
+            // Y/GUI, X/ALT, ae/SHFT: antippen = Buchstabe, halten = Modifier.
+            // TAB/LWR: antippen = Tab, halten = Lower.   ENT/RSE: antippen = Enter, halten = Raise.
+            //
+            // |  ESC  |   1   |   2   |   3   |   4   |   5   |   |   6   |   7   |   8   |   9   |   0   |   ss  |
+            // |  TAB  |   Q   |   W   |   E   |   R   |   T   |   |   Z   |   U   |   I   |   O   |   P   |   ue  |
+            // |  SHFT |   A   |   S   |   D   |   F   |   G   |   |   H   |   J   |   K   |   L   |   oe  |ae/SHFT|
+            // |  CTRL | Y/GUI | X/ALT |   C   |   V   |   B   |   |   N   |   M   |   ,   |   .   |   -   |  CTRL |
+            //                         |  SHFT |  SPC  |TAB/LOW|   |  BSPC |ENT/RAI|  DEL  |
             bindings = <
-   &kp ESC   &kp N1    &kp N2 &kp N3 &kp N4 &kp N5     &kp N6    &kp N7 &kp N8    &kp N9  &kp N0       &kp BSPC
-   &kp TAB   &kp Q     &kp W  &kp E  &kp R  &kp T      &kp DE_Z  &kp U  &kp I     &kp O   &kp P        &kp RET
-   &kp LSHFT &kp A     &kp S  &kp D  &kp F  &kp G      &kp H     &kp J  &kp K     &kp L   &kp DE_SEMI  &kp RSHFT
-   &kp LCTRL &kp DE_Y  &kp X  &kp C  &kp V  &kp B      &kp N     &kp M  &kp COMMA &kp DOT &kp DE_MINUS &kp RCTRL
-                              &kp LGUI &kp SPACE &kp LALT   &kp RET &kp SPACE &kp BSPC
+            &kp ESC    &kp N1              &kp N2           &kp N3     &kp N4     &kp N5               &kp N6    &kp N7             &kp N8     &kp N9   &kp N0        &kp DE_SS
+            &kp TAB    &kp Q               &kp W            &kp E      &kp R      &kp T                &kp DE_Z  &kp U              &kp I      &kp O    &kp P         &kp DE_UUML
+            &kp LSHFT  &kp A               &kp S            &kp D      &kp F      &kp G                &kp H     &kp J              &kp K      &kp L    &kp DE_OUML   &mt_right RSHFT DE_AUML
+            &kp LCTRL  &mt_left LGUI DE_Y  &mt_left LALT X  &kp C      &kp V      &kp B                &kp N     &kp M              &kp COMMA  &kp DOT  &kp DE_MINUS  &kp RCTRL
+                                                            &kp LSHFT  &kp SPACE  &lt_bal LOWER TAB    &kp BSPC  &lt_bal RAISE RET  &kp DEL
             >;
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
         };
 
         lower_layer {
             display-name = "Lower";
-// ------------------------------------------------------------------------------------
-// | F1   | F2  | F3  | F4  | F5  | F6  |   | F7  | F8  | F9  | F10  | F11 | F12 |
-// |      |  @  |  \  | EUR |  |  |  ~  |   |  7  |  8  |  9  |  /  |  *  |     |
-// |      |  (  |  )  |  {  |  }  |  #  |   |  4  |  5  |  6  |  -  |  +  |     |
-// |      |  [  |  ]  |  <  |  >  |  '  |   |  1  |  2  |  3  |  0  |  ,  |  ?  |
-//                                                         (rechter Daumen aussen: DEL)
+            //
+            // LOWER (halten: linker innerer Daumen): F-Tasten, Klammern, AltGr-Symbole, Numpad.
+            // Leere Felder = durchgereicht an BASE (Shift, Strg, Tab, Enter usw. bleiben nutzbar).
+            //
+            // |   F1  |   F2  |   F3  |   F4  |   F5  |   F6  |   |   F7  |   F8  |   F9  |  F10  |  F11  |  F12  |
+            // |       |   @   |   \   |  EUR  |   |   |   ~   |   |   7   |   8   |   9   |   /   |   *   |       |
+            // |       |   (   |   )   |   {   |   }   |   #   |   |   4   |   5   |   6   |   -   |   +   |       |
+            // |       |   [   |   ]   |   <   |   >   |   '   |   |   1   |   2   |   3   |   0   |   ,   |   ?   |
+            //                         |       |       |       |   |       |       |  DEL  |
             bindings = <
-   &kp F1       &kp F2          &kp F3          &kp F4          &kp F5          &kp F6          &kp F7          &kp F8          &kp F9          &kp F10       &kp F11       &kp F12
-   &trans       &kp DE_AT       &kp DE_BSLH     &kp DE_EURO     &kp DE_PIPE     &kp DE_TILDE    &kp N7          &kp N8          &kp N9          &kp DE_SLASH &kp DE_ASTRK  &trans
-   &trans       &kp DE_LPAR     &kp DE_RPAR     &kp DE_LBRC     &kp DE_RBRC     &kp DE_HASH     &kp N4          &kp N5          &kp N6          &kp DE_MINUS &kp DE_PLUS   &trans
-   &trans       &kp DE_LBKT     &kp DE_RBKT     &kp DE_LT       &kp DE_GT       &kp DE_SQT      &kp N1          &kp N2          &kp N3          &kp N0       &kp COMMA     &kp DE_QMARK
-                                                &trans          &trans          &trans          &trans          &trans          &kp DEL
+            &kp F1  &kp F2       &kp F3       &kp F4       &kp F5       &kp F6          &kp F7  &kp F8  &kp F9   &kp F10       &kp F11       &kp F12
+            &trans  &kp DE_AT    &kp DE_BSLH  &kp DE_EURO  &kp DE_PIPE  &kp DE_TILDE    &kp N7  &kp N8  &kp N9   &kp DE_SLASH  &kp DE_ASTRK  &trans
+            &trans  &kp DE_LPAR  &kp DE_RPAR  &kp DE_LBRC  &kp DE_RBRC  &kp DE_HASH     &kp N4  &kp N5  &kp N6   &kp DE_MINUS  &kp DE_PLUS   &trans
+            &trans  &kp DE_LBKT  &kp DE_RBKT  &kp DE_LT    &kp DE_GT    &kp DE_SQT      &kp N1  &kp N2  &kp N3   &kp N0        &kp COMMA     &kp DE_QMARK
+                                              &trans       &trans       &trans          &trans  &trans  &kp DEL
             >;
         };
 
         raise_layer {
             display-name = "Raise";
-// ------------------------------------------------------------------------------------
-// |  ^   |     |  2  |  3  |     |     |   |     |     |     |     |     |  '   |
-// |      |     |     |     |     |     |   |HOME |PG_UP|PG_DN| END |     |      |
-// |      |     |     |     |     |     |   |  <- |  v  |  ^  |  -> |     |      |
-// |      |     |     |     |     |     |   |     |  my |PLAY |MUTE |PRINT|      |
-// ^ mit Shift = Grad-Zeichen, ' (Akzent) mit Shift = Backtick, 2/3 = hoch 2/hoch 3
+            //
+            // RAISE (halten: rechter mittlerer Daumen): Navigation, Sonderzeichen mit Totaste, Medien.
+            // ^ mit Shift = Grad-Zeichen, acut mit Shift = Backtick.  Pfeile auf HJKL-Position.
+            //
+            // |   ^   |       |   ^2  |   ^3  |       |       |   |       |       |       |       |       |  acut |
+            // |       |       |       |       |       |       |   |  HOME |  PgUp |  PgDn |  END  |       |       |
+            // |       |       |       |       |       |       |   |   <-  |  DWN  |   UP  |   ->  |       |       |
+            // |       |       |       |       |       |       |   |       |   my  |  PLAY |  MUTE |  PRNT |       |
+            //                         |       |       |       |   |       |       |       |
             bindings = <
-   &kp DE_CARET &trans  &kp DE_SUP2 &kp DE_SUP3 &trans &trans     &trans &trans  &trans  &trans  &trans  &kp DE_ACUTE
-   &trans       &trans  &trans      &trans      &trans &trans     &kp HOME &kp PG_UP &kp PG_DN &kp END &trans &trans
-   &trans       &trans  &trans      &trans      &trans &trans     &kp LEFT &kp DOWN  &kp UP    &kp RIGHT &trans &trans
-   &trans       &trans  &trans      &trans      &trans &trans     &trans &kp DE_MU &kp C_PP &kp C_MUTE &kp PSCRN &trans
-                              &trans &trans &trans   &trans &trans &trans
+            &kp DE_CARET  &trans  &kp DE_SUP2  &kp DE_SUP3  &trans  &trans    &trans    &trans     &trans     &trans      &trans     &kp DE_ACUTE
+            &trans        &trans  &trans       &trans       &trans  &trans    &kp HOME  &kp PG_UP  &kp PG_DN  &kp END     &trans     &trans
+            &trans        &trans  &trans       &trans       &trans  &trans    &kp LEFT  &kp DOWN   &kp UP     &kp RIGHT   &trans     &trans
+            &trans        &trans  &trans       &trans       &trans  &trans    &trans    &kp DE_MU  &kp C_PP   &kp C_MUTE  &kp PSCRN  &trans
+                                               &trans       &trans  &trans    &trans    &trans     &trans
             >;
         };
 
         system_layer {
             display-name = "System";
-// ------------------------------------------------------------------------------------
-// Aktiv, solange beide Space-Daumentasten gehalten werden.
-// |      | BT1 | BT2 | BT3 | BT4 | BT5 |   | USB | BLE | TOG |     |     |      |
-// |      | RGB | EFF | BRI | BRD |     |   |     |     |     |     |     |      |
-// |      |     |     |     | HUE | SAT |   |     |     |     |     |     |      |
-// |      | UNLK|     |     |     |     |   |     |     |     |     |     | BTCLR|
+            //
+            // SYSTEM (halten: Shift-Daumen + Entf-Daumen gleichzeitig): Bluetooth, Ausgang, LEDs.
+            // x = gesperrt (&none), damit hier nichts Falsches getippt wird.
+            //
+            // |   x   |  BT1  |  BT2  |  BT3  |  BT4  |  BT5  |   |  USB  |  BLE  |  TOG  |   x   |   x   |   x   |
+            // |   x   |  TOG  |  EFF  |  BRI  |  BRD  |   x   |   |   x   |   x   |   x   |   x   |   x   |   x   |
+            // |   x   |   x   |   x   |   x   |  HUI  |  SAI  |   |   x   |   x   |   x   |   x   |   x   |   x   |
+            // |   x   |  UNLK |   x   |   x   |   x   |   x   |   |   x   |   x   |   x   |   x   |   x   | BTCLR |
+            //                         |       |       |       |   |       |       |       |
             bindings = <
-   &none &bt BT_SEL 0     &bt BT_SEL 1    &bt BT_SEL 2    &bt BT_SEL 3    &bt BT_SEL 4    &out OUT_USB &out OUT_BLE &out OUT_TOG &none &none &none
-   &none &rgb_ug RGB_TOG  &rgb_ug RGB_EFF &rgb_ug RGB_BRI &rgb_ug RGB_BRD &none           &none        &none        &none        &none &none &none
-   &none &none            &none           &none           &rgb_ug RGB_HUI &rgb_ug RGB_SAI &none        &none        &none        &none &none &none
-   &none &studio_unlock   &none           &none           &none           &none           &none        &none        &none        &none &none &bt BT_CLR
-                                   &trans &trans &trans   &trans &trans &trans
+            &none  &bt BT_SEL 0     &bt BT_SEL 1     &bt BT_SEL 2     &bt BT_SEL 3     &bt BT_SEL 4       &out OUT_USB  &out OUT_BLE  &out OUT_TOG  &none  &none  &none
+            &none  &rgb_ug RGB_TOG  &rgb_ug RGB_EFF  &rgb_ug RGB_BRI  &rgb_ug RGB_BRD  &none              &none         &none         &none         &none  &none  &none
+            &none  &none            &none            &none            &rgb_ug RGB_HUI  &rgb_ug RGB_SAI    &none         &none         &none         &none  &none  &none
+            &none  &studio_unlock   &none            &none            &none            &none              &none         &none         &none         &none  &none  &bt BT_CLR
+                                                     &trans           &trans           &trans             &trans        &trans        &trans
             >;
         };
     };
