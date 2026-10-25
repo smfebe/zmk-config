@@ -1,11 +1,38 @@
 layout: {zmk_keyboard: flixkeeb}
 layers:
   Base:
-  - [ESC, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', BSPC]
-  - [TAB, Q, W, E, R, T, DE Z, U, I, O, P, RET]
-  - [LSHFT, A, S, D, F, G, H, J, K, L, DE SEMI, RSHFT]
-  - [LCTRL, DE Y, X, C, V, B, N, M, ',', ., DE MINUS, RCTRL]
-  - [LGUI, SPACE, LALT, RET, SPACE, BSPC]
+  - [ESC, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', DE SS]
+  - [TAB, Q, W, E, R, T, DE Z, U, I, O, P, DE UUML]
+  - - LSHFT
+    - A
+    - S
+    - D
+    - F
+    - G
+    - H
+    - J
+    - K
+    - L
+    - DE OUML
+    - {t: DE AUML, h: RSHFT}
+  - - LCTRL
+    - {t: DE Y, h: LGUI}
+    - {t: X, h: LALT}
+    - C
+    - V
+    - B
+    - N
+    - M
+    - ','
+    - .
+    - DE MINUS
+    - RCTRL
+  - - LSHFT
+    - SPACE
+    - {t: TAB, h: Lower}
+    - BSPC
+    - {t: RET, h: Raise}
+    - DEL
   Lower:
   - [F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12]
   - - {t: ▽, type: trans}
@@ -45,7 +72,7 @@ layers:
     - ','
     - DE QMARK
   - - {t: ▽, type: trans}
-    - {type: held}
+    - {t: ▽, type: trans}
     - {type: held}
     - {t: ▽, type: trans}
     - {t: ▽, type: trans}
@@ -102,7 +129,7 @@ layers:
   - - {t: ▽, type: trans}
     - {t: ▽, type: trans}
     - {t: ▽, type: trans}
-    - {type: held}
+    - {t: ▽, type: trans}
     - {type: held}
     - {t: ▽, type: trans}
   System:
@@ -121,34 +148,16 @@ layers:
   - ['', RGB TOG, RGB EFF, RGB BRI, RGB BRD, '', '', '', '', '', '', '']
   - ['', '', '', '', RGB HUI, RGB SAI, '', '', '', '', '', '']
   - ['', '&studio_unlock', '', '', '', '', '', '', '', '', '', BT CLR]
-  - - {t: ▽, type: trans}
-    - {type: held}
+  - - {type: held}
+    - {t: ▽, type: trans}
+    - {t: ▽, type: trans}
     - {t: ▽, type: trans}
     - {t: ▽, type: trans}
     - {type: held}
-    - {t: ▽, type: trans}
 combos:
-- p: [13, 25]
-  k: DE AUML
-  l: [Base]
-- p: [21, 33]
-  k: DE OUML
-  l: [Base]
-- p: [19, 31]
-  k: DE UUML
-  l: [Base]
-- p: [26, 38]
-  k: DE SS
-  l: [Base]
 - p: [24, 35]
   k: '&caps_word'
   l: [Base]
-- p: [49, 50]
-  k: Lower
-  l: [Base]
-- p: [51, 52]
-  k: Raise
-  l: [Base]
-- p: [49, 52]
+- p: [48, 53]
   k: System
   l: [Base]

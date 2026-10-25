@@ -302,11 +302,11 @@
             // |  CTRL | Y/GUI | X/ALT |   C   |   V   |   B   |   |   N   |   M   |   ,   |   .   |   -   |  CTRL |
             //                         |  SHFT |  SPC  |TAB/LOW|   |  BSPC |ENT/RAI|  DEL  |
             bindings = <
-            &kp ESC    &kp N1              &kp N2           &kp N3     &kp N4     &kp N5               &kp N6    &kp N7             &kp N8     &kp N9   &kp N0        &kp DE_SS
-            &kp TAB    &kp Q               &kp W            &kp E      &kp R      &kp T                &kp DE_Z  &kp U              &kp I      &kp O    &kp P         &kp DE_UUML
-            &kp LSHFT  &kp A               &kp S            &kp D      &kp F      &kp G                &kp H     &kp J              &kp K      &kp L    &kp DE_OUML   &mt_right RSHFT DE_AUML
-            &kp LCTRL  &mt_left LGUI DE_Y  &mt_left LALT X  &kp C      &kp V      &kp B                &kp N     &kp M              &kp COMMA  &kp DOT  &kp DE_MINUS  &kp RCTRL
-                                                            &kp LSHFT  &kp SPACE  &lt_bal LOWER TAB    &kp BSPC  &lt_bal RAISE RET  &kp DEL
+            &kp ESC    &kp N1              &kp N2           &kp N3     &kp N4     &kp N5               &kp N6             &kp N7        &kp N8     &kp N9   &kp N0        &kp DE_SS
+            &kp TAB    &kp Q               &kp W            &kp E      &kp R      &kp T                &kp DE_Z           &kp U         &kp I      &kp O    &kp P         &kp DE_UUML
+            &kp LSHFT  &kp A               &kp S            &kp D      &kp F      &kp G                &kp H              &kp J         &kp K      &kp L    &kp DE_OUML   &mt_right RSHFT DE_AUML
+            &kp LCTRL  &mt_left LGUI DE_Y  &mt_left LALT X  &kp C      &kp V      &kp B                &kp N              &kp M         &kp COMMA  &kp DOT  &kp DE_MINUS  &kp RCTRL
+                                                            &kp LSHFT  &kp SPACE  &lt_bal LOWER TAB    &lt_bal RAISE RET  &kp BSPC      &kp DEL
             >;
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
         };
